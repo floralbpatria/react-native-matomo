@@ -60,8 +60,9 @@ RCT_EXPORT_METHOD(trackScreen: (NSString* _Nonnull)path title: (NSString* _Nulla
     RCTLogInfo(@"Tracking screen");
 #endif
     if (tracker != nil) {
-        NSArray* views = [path componentsSeparatedByString:@"/"];
-        [tracker trackWithView:views url:nil];
+        NSArray* views = [title componentsSeparatedByString:@"/"];
+        NSURL* nsUrl = path != nil ? [NSURL URLWithString: path] : nil;
+        [tracker trackWithView:views url:nsUrl];
     }
 }
 
@@ -134,10 +135,10 @@ RCT_EXPORT_METHOD(trackSearch:(NSString* _Nonnull)query values:(NSDictionary* _N
         NSString * category = [values objectForKey:@"category"];
         NSString * resultCount = [values objectForKey:@"resultCount"];
         NSString * url = [values objectForKey:@"url"];
-        
+
         NSInteger intResultCount = resultCount != nil ? [resultCount integerValue] : 0;
         NSURL* nsUrl = url != nil ? [NSURL URLWithString: url] : nil;
-        
+
         [tracker trackSearchWithQuery:query category:category resultCount:intResultCount url:nsUrl];
     }
 }
