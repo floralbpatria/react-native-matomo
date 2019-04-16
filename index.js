@@ -31,4 +31,7 @@ module.exports = {
   setAppOptOut: function(isOptOut) {
     Matomo.setAppOptOut(isOptOut);
   }
+  setIsOptedOut: function(isOptedOut) {
+    Matomo.setIsOptedOut(isOptedOut);
+  }
 };

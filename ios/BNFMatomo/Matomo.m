@@ -54,6 +54,16 @@ RCT_EXPORT_METHOD(setUserId:(NSString* _Nonnull)userID)
     }
 }
 
+RCT_EXPORT_METHOD(setIsOptedOut:(BOOL)isOptedOut)
+{
+#if DEBUG
+    RCTLogInfo(@"Setting IsOptedOut");
+#endif
+    if (tracker != nil) {
+        tracker.isOptedOut = isOptedOut;
+    }
+}
+
 RCT_EXPORT_METHOD(trackScreen: (NSString* _Nonnull)path title: (NSString* _Nullable)title)
 {
 #if DEBUG
