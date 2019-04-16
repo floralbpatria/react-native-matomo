@@ -28,9 +28,6 @@ module.exports = {
   trackSearch: function(query, category, resultCount, url) {
     Matomo.trackSearch(query, {category, resultCount, url});
   },
-  setAppOptOut: function(isOptOut) {
-    Matomo.setAppOptOut(isOptOut);
-  }
   setIsOptedOut: function(isOptedOut) {
     Matomo.setIsOptedOut(isOptedOut);
   }
