@@ -21,5 +21,5 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:+"
-    implementation 'org.matomo.sdk:tracker:4.0.1'
+    implementation 'com.github.matomo-org:matomo-sdk-android:v4.1.2'
 }
