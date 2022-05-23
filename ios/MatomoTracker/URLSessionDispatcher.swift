@@ -1,58 +1,74 @@
 import Foundation
 
 #if os(OSX)
-    import WebKit
+import WebKit
 #elseif os(iOS)
-    import UIKit
+import WebKit
 #endif
 
-final class URLSessionDispatcher: Dispatcher {
+public final class URLSessionDispatcher: Dispatcher {
     
-    let serializer = EventSerializer()
-    let timeout: TimeInterval
-    let session: URLSession
-    let baseURL: URL
+    private let serializer = EventSerializer()
+    private let timeout: TimeInterval
+    private let session: URLSession
+    public let baseURL: URL
 
-    private(set) var userAgent: String?
+    public private(set) var userAgent: String?
+
+    #if os(iOS)
+    private var webView: WKWebView?
+    #endif
     
     /// Generate a URLSessionDispatcher instance
     ///
     /// - Parameters:
     ///   - baseURL: The url of the Matomo server. This url has to end in `piwik.php`.
     ///   - userAgent: An optional parameter for custom user agent.
-    init(baseURL: URL, userAgent: String? = nil) {                
+    ///   - timeout: The timeout interval for the request. The default is 5.0.
+    public init(baseURL: URL, userAgent: String? = nil, timeout: TimeInterval = 5.0) {
         self.baseURL = baseURL
-        self.timeout = 5
+        self.timeout = timeout
         self.session = URLSession.shared
-        DispatchQueue.main.async {
-            self.userAgent = userAgent ?? URLSessionDispatcher.defaultUserAgent()
+        if let userAgent = userAgent {
+            self.userAgent = userAgent
+        } else {
+            defaultUserAgent() { [weak self] userAgent in
+                self?.userAgent = userAgent
+            }
         }
     }
     
-    private static func defaultUserAgent() -> String {
-        assertMainThread()
-        #if os(OSX)
+    private func defaultUserAgent(_ completion: @escaping (String) -> Void) {
+        let userAgentSuffix = " MatomoTracker SDK URLSessionDispatcher"
+        DispatchQueue.main.async { [weak self] in
+            #if os(OSX)
             let webView = WebView(frame: .zero)
-            let currentUserAgent = webView.stringByEvaluatingJavaScript(from: "navigator.userAgent") ?? ""
-        #elseif os(iOS)
-            let webView = UIWebView(frame: .zero)
-            var currentUserAgent = webView.stringByEvaluatingJavaScript(from: "navigator.userAgent") ?? ""
-            if let regex = try? NSRegularExpression(pattern: "\\((iPad|iPhone);", options: .caseInsensitive) {
-                let deviceModel = Device.makeCurrentDevice().platform
-                currentUserAgent = regex.stringByReplacingMatches(
-                    in: currentUserAgent,
-                    options: .withTransparentBounds,
-                    range: NSRange(location: 0, length: currentUserAgent.count),
-                    withTemplate: "(\(deviceModel);"
-                )
+            let userAgent = webView.stringByEvaluatingJavaScript(from: "navigator.userAgent") ?? ""
+            completion(userAgent.appending(userAgentSuffix))
+            #elseif os(iOS)
+            self?.webView = WKWebView(frame: .zero)
+            self?.webView?.evaluateJavaScript("navigator.userAgent") { (result, error) -> Void in
+                if let regex = try? NSRegularExpression(pattern: "\\((iPad|iPhone);", options: .caseInsensitive),
+                    let resultString = result as? String {
+                    let userAgent = regex.stringByReplacingMatches(
+                        in: resultString,
+                        options: .withTransparentBounds,
+                        range: NSRange(location: 0, length: resultString.count),
+                        withTemplate: "(\(Device.makeCurrentDevice().platform);"
+                    )
+                    completion(userAgent.appending(userAgentSuffix))
+                } else {
+                    completion(userAgentSuffix)
+                }
+                self?.webView = nil
             }
-        #elseif os(tvOS)
-            let currentUserAgent = ""
-        #endif
-        return currentUserAgent.appending(" MatomoTracker SDK URLSessionDispatcher")
+            #elseif os(tvOS)
+            completion(userAgentSuffix)
+            #endif
+        }
     }
     
-    func send(events: [Event], success: @escaping ()->(), failure: @escaping (_ error: Error)->()) {
+    public func send(events: [Event], success: @escaping ()->(), failure: @escaping (_ error: Error)->()) {
         let jsonBody: Data
         do {
             jsonBody = try serializer.jsonData(for: events)
@@ -87,4 +103,3 @@ final class URLSessionDispatcher: Dispatcher {
     }
     
 }
-

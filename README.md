@@ -12,16 +12,23 @@ Integrating Matomo into your React Native app
 
 1.  [Install Matomo](https://matomo.org/docs/installation/)
 2.  [Create a new website in the Matomo web interface](https://matomo.org/docs/manage-websites/). Copy the Website ID from "Settings > Websites".
-3.  [Include the library](#include-library)
-4.  [Initialize Tracker](#initialize-tracker).
+3.  [Include the library](#include-the-library)
+4.  [Initialize Tracker](#init-tracker).
 5.  [Track screen views, goals and more](#tracker-usage).
 
 ### Include the library
 
 #### iOS
 
+#### iOS (with cocoapods)
+`pod 'BNFMatomo', :podspec => '../node_modules/react-native-matomo/BNFMatomo.podspec'`
+
+#### iOS (Manual)
+
 1.  Add `node_modules/react-native-matomo/ios/BNFMatomo.xcodeproj` to your xcode project, usually under the `Libraries` group
-2.  Add `libBNFMatomo.a` (from `Products` under `BNFMatomo.xcodeproj`) to build target's `Linked Frameworks and Libraries` list
+2.  Add `libBNFMatomo.a` (from `Products` under `BNFMatomo.xcodeproj`) to build target's `Linked Frameworks and Libraries` and `Target Dependencies` lists
+3. If the MatomoTracker is the first Swift library in your project you need to add a random .swift file to your project
+4. In your main target set the Swift version to 4.2
 
 #### Android
 
@@ -65,6 +72,23 @@ If no user ID is used, the SDK will generate, manage and persist a random id for
 Matomo.setUserId('123e4567-e89b-12d3-a456-426655440000');
 ```
 
+#### Custom Dimensions
+
+The Matomo SDK currently supports Custom Dimensions for the Visit Scope. Using Custom Dimensions you can add properties to the whole visit, such as "Did the user finish the tutorial?", "Is the user a paying user?" or "Which version of the Application is being used?" and such. Before sending custom dimensions please make sure Custom Dimensions are [properly installed and documented](https://matomo.org/docs/custom-dimensions/). You will need the ID of your configured Dimension.
+
+After that you can set a new Dimension,
+
+```javascript
+Matomo.setCustomDimension(1, 'abc');
+```
+
+or remove an already set dimension.
+
+```javascript
+Matomo.setCustomDimension(1, null);
+```
+Dimensions in the Visit Scope will be sent along every Page View or Event. Custom Dimensions are not persisted by the SDK and have to be re-configured upon application startup.
+
 #### Track screen views
 
 To send a screen view set the screen path and titles on the tracker.
@@ -96,6 +120,14 @@ If you want to track the app downloads, there is also a function to do that (onl
 
 ```javascript
 Matomo.trackAppDownload();
+```
+
+#### Setting App Opt Out
+
+The MatomoTracker SDK supports opting out of tracking. Note that this flag must be set each time the app starts up and will default to false. To set the app-level opt out, use:
+
+```javascript
+Matomo.setAppOptOut(true);
 ```
 
 ## Contribute

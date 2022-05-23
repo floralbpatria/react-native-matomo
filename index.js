@@ -6,6 +6,12 @@ module.exports = {
       Matomo.setUserId(userId + '');
     }
   },
+  setCustomDimension: function(id, value){
+    Matomo.setCustomDimension(id, value ? (value + '') : null);
+  },
+  setAppOptOut: function(isOptedOut) {
+    Matomo.setAppOptOut(isOptedOut);
+  },
   trackAppDownload: Matomo.trackAppDownload,
   trackScreen: function(path, title) {
     Matomo.trackScreen(path, title);

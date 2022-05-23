@@ -22,7 +22,7 @@
 
 static NSString * const MatamoAppTrackingKey = @"@@Matamo-tracking-version@@";
 
-+ (NSString *)appTrackId {
++(NSString *)appTrackId {
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     NSString *appDisplayName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
     NSString *majorVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
@@ -30,7 +30,7 @@ static NSString * const MatamoAppTrackingKey = @"@@Matamo-tracking-version@@";
     return [NSString stringWithFormat:@"%@-%@-(%@)", appDisplayName, majorVersion, minorVersion];
 }
 
-+ (float)appVersion {
++(float)appVersion {
     return [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"] floatValue];
 }
 
@@ -61,6 +61,20 @@ RCT_EXPORT_METHOD(setIsOptedOut:(BOOL)isOptedOut)
 #endif
     if (tracker != nil) {
         tracker.isOptedOut = isOptedOut;
+    }
+}
+
+RCT_EXPORT_METHOD(setCustomDimension: (NSInteger* _Nonnull)index value: (NSString* _Nullable)value)
+{
+#if DEBUG
+    RCTLogInfo(@"Setting dimension");
+#endif
+    if (tracker != nil) {
+        if(value == nil){
+            [tracker removeWithDimensionAtIndex:index];
+        } else {
+            [tracker setDimension:value forIndex:index];
+        }
     }
 }
 
@@ -111,7 +125,7 @@ RCT_EXPORT_METHOD(trackCampaign:(NSString* _Nullable)name keyboard:(NSString* _N
     }
 }
 
-RCT_EXPORT_METHOD(trackContentImpression:(NSString* _Nonnull)name values:(NSDictionary* _Nonnull)values)
+RCT_EXPORT_METHOD(trackContentImpression: (NSString* _Nonnull)name values:(NSDictionary* _Nonnull)values)
 {
 #if DEBUG
     RCTLogInfo(@"Tracking content impression");
