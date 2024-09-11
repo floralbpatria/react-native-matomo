@@ -97,10 +97,38 @@ public class MatomoModule extends ReactContextBaseJavaModule implements Lifecycl
     public void trackCampaign(String name, String keyboard) {}
 
     @ReactMethod
-    public void trackContentImpression(@NonNull String name, @NonNull ReadableMap values) {}
+    public void trackContentImpression(@NonNull String name, @NonNull ReadableMap values) {
+        String piece = null;
+        String target = null;
 
+        if (values.hasKey("piece") && !values.isNull("piece")) {
+            piece = values.getString("piece");
+        }
+        if (values.hasKey("target") && !values.isNull("target")) {
+            target = values.getString("target");
+        }
+
+        getTrackHelper().impression(name).target(target).piece(piece).with(mMatomoTracker);
+
+    }
     @ReactMethod
-    public void trackContentInteraction(@NonNull String name, @NonNull ReadableMap values) {}
+    public void trackContentInteraction(@NonNull String name, @NonNull ReadableMap values) {
+        String interaction = null;
+        String piece = null;
+        String target = null;
+
+        if (values.hasKey("interaction") && !values.isNull("interaction")) {
+            interaction = values.getString("interaction");
+        }
+        if (values.hasKey("piece") && !values.isNull("piece")) {
+            piece = values.getString("piece");
+        }
+        if (values.hasKey("target") && !values.isNull("target")) {
+            target = values.getString("target");
+        }
+
+        getTrackHelper().interaction(name, interaction).target(target).piece(piece).with(mMatomoTracker);
+    }
 
     @ReactMethod
     public void trackSearch(@NonNull String query, @NonNull ReadableMap values) {}
